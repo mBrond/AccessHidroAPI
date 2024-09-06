@@ -1,17 +1,8 @@
 import json
 import os
+import inicializacao
+from acess import Acess
 from interfaces import *
-
-
-def criaConfigs(pathConfigs):
-    existeArq =os.path.isfile(pathConfigs)
-    if(not existeArq):
-        conteudoJson = '{"Credenciais":{"Ana":{"Identificador":"", "Senha":""}}}'
-
-        arq = open(pathConfigs, 'w')
-        arq.write(conteudoJson)
-
-        arq.close()
 
 def atualizaCredenciaisAna(pathConfigs):
     novosDadosDict = interfaceCredenciais()
@@ -31,14 +22,57 @@ def atualizaCredenciaisAna(pathConfigs):
     arq.close()
 
 
+def escreverEstacoes(pathEstacoes, operacao, estacoes:list):
+    if(operacao == 1):
+        f = open(pathEstacoes, 'w')
+    else:
+        f = open(pathEstacoes, 'a')
+
+    for estacao in estacoes:
+        f.write(estacao+'\n')
+
+    f.close()
+
+def escreverDados(pathResultados, dados, codigoEstacao):
+    f = open(pathResultados+str(codigoEstacao)+'.txt', 'w')
+    f.write(str(dados))
+    f.close()
+
+def solicitarEstacao(dataComeco, pathEstacoes):
+    acess = Acess()
+    acess.lerCredenciais()
+
+    f = open(pathEstacoes, 'r')
+    estacoes = f.read().split('\n')
+    estacoes.remove('')
+    f.close()
+
+    dataAtual = dataComeco
+    token = acess.forceRequestToken()
+    for estacao in estacoes:
+        dados = acess.requestTelemetricaAdotada(int(estacao), dataAtual, token)
+        escreverDados('resultados\\', dados.content, estacao)
+
 def main():
     pathConfigs = 'configs.json'
-    criaConfigs(pathConfigs)
-    interfaceMenu()
-    entradaUser = input()
-    if(entradaUser==1):
-        atualizaCredenciaisAna(pathConfigs)
-    elif():
-        pass
+    inicializacao.criaConfigs(pathConfigs)
+
+    pathEstacoes = 'estacoes.txt'
+
+    
+    entradaUser = 9
+    while(entradaUser!=0):
+        interfaceMenu()
+        entradaUser = int(input())
+        if(entradaUser==1):
+            atualizaCredenciaisAna(pathConfigs)
+        elif(entradaUser==2):
+            operacao = interfaceOperacaoEstacao()
+            escreverEstacoes(pathEstacoes, operacao, estacoes=interfaceSolicitarEstacoes())
+        elif(entradaUser==3): #solicitar um dia para todas as estacoes
+            dataComeco, dataFinal = datasComecoFinal()
+            solicitarEstacao(dataComeco, pathEstacoes)
+        else:
+            pass
 if __name__ == "__main__":
     main()

@@ -69,7 +69,7 @@ class Acess:
 
         return requests.get(url=url, headers = headers, params = params)
     
-    def requestAcessToken(self):
+    def requestToken(self):
         """
         Realiza o login com o ID e senha cadastrados pela Agência Nacional de Águas.
         :param id: Identificador cadastrado.
@@ -78,4 +78,22 @@ class Acess:
         """
         url = self.urlApi + '/OAUth/v1'
         params = {'Identificador': self.id, 'Senha': self.senha}
-        return requests.get(url, params)
+        return requests.get(url=url, headers=params)
+
+    def forceRequestToken(self):
+
+        token = self.requestToken()
+        print(token)
+        tentativas = 1  #melhorar lógica com TRY-EXCEPT (?)
+        while(token.status_code!=200 and tentativas <5):
+            token = self.requestToken()  
+            tentativas = tentativas+1
+            print(token)
+
+        if(token.status_code==200):
+            token = json.loads(token.content)
+            itens = token['items']
+            return itens['tokenautenticacao']
+        else:
+            print("Não foi possível requisitar o token. Finalizando aplicação")
+            exit()
