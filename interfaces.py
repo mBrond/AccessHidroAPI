@@ -5,6 +5,8 @@ def interfaceCredenciais():
     senha = input("Senha: ")
     return {"id": id, "senha": senha}
 
+def unicaData():
+    return (input("Qual a data?"))
 
 def datasComecoFinal(): #FAZER CHECAGEM DE DATAS CORRETAS
     dataComeco = input("Data de comeco (yyyy-mm-dd)")
@@ -12,7 +14,8 @@ def datasComecoFinal(): #FAZER CHECAGEM DE DATAS CORRETAS
     return [dataComeco, dataFinal]
 
 def interfaceMenu():
-    texto = "\n0. Sair\n1. Atualizar credenciais\n2. Atualizar estacoes\n3. Data única\n"
+    texto = "\n0. Sair\n1. Atualizar credenciais\n2. Atualizar estacoes\n3. Data única (Detalhada)\n"
+    texto = texto+"4. Data única (Adotada)\n5. Período (Detalhada)\n6. Período (Adotada)"
     print(texto)
 
 def interfaceSolicitarEstacoes():

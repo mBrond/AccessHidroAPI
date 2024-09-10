@@ -1,3 +1,4 @@
 configs.json
 resultados
 *.txt
+__pycache__
