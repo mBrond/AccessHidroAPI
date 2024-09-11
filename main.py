@@ -1,6 +1,6 @@
 import json
 import os
-import datetime
+from datetime import datetime, timedelta
 import inicializacao
 from acess import Acess
 from interfaces import *
@@ -113,8 +113,53 @@ def solicitarPeriodoAdotada(dataComeco, dataFinal, pathEstacoes):
     estacoes = f.read().split('\n')
     estacoes.remove('')
     f.close()
-    while(dataComeco != dataFinal):
 
+    for estacao in estacoes:
+        novoArquivo = 'resultados\\{}-Adotada-{}-{}.txt'.format(estacao, dataComeco, dataFinal)
+        cria_adotada(novoArquivo)
+        
+        token = acess.forceRequestToken()
+        
+        dataAtual = datetime.datetime.strptime(dataComeco, "%Y-%m-%d")
+        dataFinal = datetime.datetime.strptime(dataFinal, "%Y-%m-%d")
+        
+        while(dataAtual != dataFinal):
+            try:
+                request = acess.requestTelemetricaAdotada(int(estacao), dataAtual, token)
+            except:
+                token = acess.forceRequestToken()
+                request = acess.requestTelemetricaAdotada(int(estacao), dataAtual, token)
+            dados = decodeRequestAdotada(request)
+            atualiza_adotada(novoArquivo, dados)
+            dataAtual = dataAtual + timedelta(days=1)
+
+def solicitarPeriodoDetalhada(dataComeco, dataFinal, pathEstacoes):
+    acess = Acess()
+    acess.lerCredenciais()
+
+    f = open(pathEstacoes, 'r')
+    estacoes = f.read().split('\n')
+    estacoes.remove('')
+    f.close()
+
+    for estacao in estacoes:
+        novoArquivo = 'resultados\\{}-Detalhada-{}-{}.txt'.format(estacao, dataComeco, dataFinal)
+        cria_detalhada(novoArquivo)
+        
+        token = acess.forceRequestToken()
+        
+        dataAtual = datetime.datetime.strptime(dataComeco, "%Y-%m-%d")
+        dataFinal = datetime.datetime.strptime(dataFinal, "%Y-%m-%d")
+        
+        while(dataAtual != dataFinal):
+            try:
+                request = acess.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
+            except:
+                token = acess.forceRequestToken()
+                request = acess.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
+            dados = decodeRequestAdotada(request)
+            atualiza_adotada(novoArquivo, dados)
+            dataAtual = dataAtual + timedelta(days=1)
 
 
 def main():
@@ -141,9 +186,13 @@ def main():
             solicitarEstacaoAdotada(dataComeco, pathEstacoes)
 
         elif(entradaUser==5):
-            pass
+            dataComeco, dataFinal = datasComecoFinal()
+            solicitarPeriodoDetalhada(dataComeco, dataFinal, pathEstacoes)
+
         elif(entradaUser==6):
-            pass
+            dataComeco, dataFinal = datasComecoFinal()
+            solicitarPeriodoAdotada(dataComeco, dataFinal, pathEstacoes)
+        
         else:
             pass
 if __name__ == "__main__":
