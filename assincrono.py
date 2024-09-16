@@ -1,51 +1,58 @@
 import asyncio
 import aiohttp
 from manipulacaoArquivos import *
-from main import decodeRequestAdotada
-
-from acess import Acess
+# from main import decodeRequestAdotada
+from datetime import datetime, timedelta
+from acess import *
 
 url = 'https://www.ana.gov.br/hidrowebservice/EstacoesTelemetricas/HidroinfoanaSerieTelemetricaAdotada/v1'  # list of URLs to download
 
 async def download_url(session, url, headers, params, pathArquivo):
     async with session.get(url, headers=headers, params=params) as response:
-        # print(await response.content.read())
-        dados = decodeRequestAdotada( await response.content.read())
-        atualiza_adotada(pathArquivo, dados)
+        return await response.content.read()
 
-async def main():
+async def mainAsync(codEstacao, diaComeco, diaFinal):
     
+    diaFinal = datetime.strptime(diaFinal, "%Y-%m-%d")
+    diaComeco = datetime.strptime(diaComeco, "%Y-%m-%d")
+
     acess = Acess()
     acess.lerCredenciais()
     token = acess.forceRequestToken()
 
     headers = {'Authorization': 'Bearer '+token}
 
-    params1 = {
-            'Código da Estação': 76310000,
-            'Tipo Filtro Data': "DATA_LEITURA",
-            'Data de Busca (yyyy-MM-dd)': '2024-01-01',
-            'Range Intervalo de busca': 'HORA_24'
-        }
+    qtdDias = 366
+    params = criaParams(codEstacao, diaComeco, diaFinal, qtdDias)
     
-    params2 = {
-            'Código da Estação': 76310000,
-            'Tipo Filtro Data': "DATA_LEITURA",
-            'Data de Busca (yyyy-MM-dd)': '2024-01-02',
-            'Range Intervalo de busca': 'HORA_24'
-        }
-    
-    novoArquivo = 'teste{}.txt'.format(params2['Código da Estação'])
+    novoArquivo = 'teste{}.txt'.format(codEstacao)
     cria_adotada(novoArquivo)
 
-
     async with aiohttp.ClientSession(headers=headers) as session:
-        tasks = [
-            download_url(session, url, headers, params1, novoArquivo),
-            download_url(session, url, headers, params2, novoArquivo),]
-        await asyncio.gather(*tasks)
+        tasks = []
+        for param in params:
+            tasks.append(download_url(session, url, headers, param, novoArquivo))
+        respostasLista = await asyncio.gather(*tasks)
+
+    for resposta in respostasLista:
+        dados = decodeRequestAdotada(resposta)     
+        atualiza_adotada(novoArquivo, dados)       
+
+def criaParams(codEstacao: int, diaComeco, diaFinal, qtdMax):
+    paramsL = list()
+
+    while diaComeco < diaFinal and len(paramsL) <= qtdMax:
+        params = {
+            'Código da Estação': codEstacao,
+            'Tipo Filtro Data': "DATA_LEITURA",
+            'Data de Busca (yyyy-MM-dd)': datetime.strftime(diaComeco, "%Y-%m-%d"),
+            'Range Intervalo de busca': 'HORA_24'
+        }
+        paramsL.append(params)
+        diaComeco = diaComeco + timedelta(days=1)
+
+    return paramsL
 
 
-
-
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(mainAsync(76310000, '2024-06-01', '2024-07-01'))
