@@ -124,7 +124,6 @@ def solicitarPeriodoDetalhada(dataComeco, dataFinal, pathEstacoes):
             atualiza_adotada(novoArquivo, dados)
             dataAtual = dataAtual + timedelta(days=1)
 
-
 def main():
     pathConfigs = 'configs.json'
     inicializacao.criaConfigs(pathConfigs)

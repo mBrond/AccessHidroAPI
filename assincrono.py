@@ -16,27 +16,36 @@ async def mainAsync(codEstacao, diaComeco, diaFinal):
     diaFinal = datetime.strptime(diaFinal, "%Y-%m-%d")
     diaComeco = datetime.strptime(diaComeco, "%Y-%m-%d")
 
+    #Total de dias que terão os dados baixados (se não exceder data atual. Ex: ser dia 12/09 e tentar baixar até 31/12)
+    diasDownload = (diaFinal - diaComeco).days
+
     acess = Acess()
     acess.lerCredenciais()
     token = acess.forceRequestToken()
 
     headers = {'Authorization': 'Bearer '+token}
 
-    qtdDias = 366
-    params = criaParams(codEstacao, diaComeco, diaFinal, qtdDias)
-    
+    qtdDias = 2 #(valorEsperado - 1)download de quantos dias será feito concomitantemente
+    iteracao = 1
+
     novoArquivo = 'teste{}.txt'.format(codEstacao)
     cria_adotada(novoArquivo)
 
-    async with aiohttp.ClientSession(headers=headers) as session:
-        tasks = []
-        for param in params:
-            tasks.append(download_url(session, url, headers, param, novoArquivo))
-        respostasLista = await asyncio.gather(*tasks)
+    while(iteracao * qtdDias <= diasDownload):
+        params = criaParams(codEstacao, diaComeco, diaFinal, qtdDias)
 
-    for resposta in respostasLista:
-        dados = decodeRequestAdotada(resposta)     
-        atualiza_adotada(novoArquivo, dados)       
+        async with aiohttp.ClientSession(headers=headers) as session:
+            tasks = []
+            for param in params:
+                tasks.append(download_url(session, url, headers, param, novoArquivo))
+            respostasLista = await asyncio.gather(*tasks)
+
+        for resposta in respostasLista:
+            dados = decodeRequestAdotada(resposta)     
+            atualiza_adotada(novoArquivo, dados)  
+  
+        iteracao = iteracao+1
+        diaComeco = diaComeco + timedelta(days=qtdDias)
 
 def criaParams(codEstacao: int, diaComeco, diaFinal, qtdMax):
     paramsL = list()
@@ -55,4 +64,14 @@ def criaParams(codEstacao: int, diaComeco, diaFinal, qtdMax):
 
 
 if __name__ == "__main__":
-    asyncio.run(mainAsync(76310000, '2024-06-01', '2024-07-01'))
+
+    pathEstacoes = 'estacoes.txt'
+
+    f = open(pathEstacoes, 'r')
+    estacoes = f.read().split('\n')
+    # estacoes.remove('')
+    f.close()
+
+    for estacao in estacoes:
+        print(estacao)
+        asyncio.run(mainAsync(estacao, '2023-01-01', '2023-01-11'))
