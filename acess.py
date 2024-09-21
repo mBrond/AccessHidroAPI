@@ -36,14 +36,10 @@ class Acess:
         diaFinal= kwargs.get('diaFinal')
         if not diaFinal:
             diaFinal = diaComeco + timedelta(days=1)
-        qtdMaxParams = kwargs.get('qtdMaxParams')
-        if not qtdMaxParams:
-            qtdMaxParams = 2 #0 - 2
-
 
         paramsL = list()
 
-        while diaComeco < diaFinal and len(paramsL) <= qtdMaxParams:
+        while diaComeco < diaFinal:
             params = {
                 'Código da Estação': codEstacao,
                 'Tipo Filtro Data': filtroData,
@@ -54,6 +50,17 @@ class Acess:
             diaComeco = diaComeco + timedelta(days=1)
 
         return paramsL
+
+    def _defineQtdDownloadsSimultaneos(self, diasDownload):
+        #Define a quantidade maxima de download simultaneos que serão realizados. 
+        # Muitos downloads simultaneos podem gerar problema ?????
+        # Valores arbitrários 
+        if diasDownload <= 100:
+            return 10
+        elif diasDownload < 365:
+            return 100
+        else:
+            return 366
 
     def requestTelemetricaDetalhada(self, estacaoCodigo: int, data: str, token: str, intervaloBusca="HORA_24", filtroData = "DATA_LEITURA"):
         """
@@ -129,7 +136,7 @@ class Acess:
             print("Não foi possível requisitar o token. Finalizando aplicação")
             exit()
 
-    async def requestTelemetricaAdotadaAsync(self, estacaoCodigo: int, stringComeco: str, stringFinal: str, headers: dict, qtdDias=2):
+    async def requestTelemetricaAdotadaAsync(self, estacaoCodigo: int, stringComeco: str, stringFinal: str, headers: dict):
 
         diaFinal = datetime.strptime(stringFinal, "%Y-%m-%d")
         diaComeco = datetime.strptime(stringComeco, "%Y-%m-%d")
@@ -137,20 +144,51 @@ class Acess:
         #Total de dias que terão os dados baixados (se não exceder data atual. Ex: hoje ser dia 12/09 e tentar baixar até 31/12 pode dar erro)
         diasDownload = (diaFinal - diaComeco).days
 
+        qtdDias = self._defineQtdDownloadsSimultaneos(diasDownload)
+
         url = self.urlApi + "/HidroinfoanaSerieTelemetricaAdotada/v1"
 
-        iteracao = 1
+        iteracao = 0
         respostaLista = list()
         while(iteracao * qtdDias <= diasDownload):
-            params = self._criaParams(estacaoCodigo, diaComeco, diaFinal=diaFinal)
+            params = self._criaParams(estacaoCodigo, diaComeco, diaFinal=diaComeco+timedelta(days=qtdDias))
 
             async with aiohttp.ClientSession(headers=headers) as session:
                 tasks = []
                 for param in params:
                     tasks.append(_download_url(session, url, headers, param))
-                respostaLista.append(await asyncio.gather(*tasks))
+                resposta = await asyncio.gather(*tasks)
+                respostaLista.append(resposta)
 
-            diaComeco = diaComeco + timedelta(days=1)
+            diaComeco = diaComeco + timedelta(days=qtdDias)
+            iteracao = iteracao + 1 
+        return respostaLista
+    
+    async def requestTelemetricaDetalhadaAsync(self, estacaoCodigo: int, stringComeco: str, stringFinal: str, headers: dict):
+
+        diaFinal = datetime.strptime(stringFinal, "%Y-%m-%d")
+        diaComeco = datetime.strptime(stringComeco, "%Y-%m-%d")
+
+        #Total de dias que terão os dados baixados (se não exceder data atual. Ex: hoje ser dia 12/09 e tentar baixar até 31/12 pode dar erro)
+        diasDownload = (diaFinal - diaComeco).days
+
+        qtdDias = self._defineQtdDownloadsSimultaneos(diasDownload)
+
+        url = self.urlApi + "/HidroinfoanaSerieTelemetricaDetalhada/v1"
+
+        iteracao = 0
+        respostaLista = list()
+        while(iteracao * qtdDias <= diasDownload):
+            params = self._criaParams(estacaoCodigo, diaComeco, diaFinal=diaComeco+timedelta(days=qtdDias))
+
+            async with aiohttp.ClientSession(headers=headers) as session:
+                tasks = []
+                for param in params:
+                    tasks.append(_download_url(session, url, headers, param))
+                resposta = await asyncio.gather(*tasks)
+                respostaLista.append(resposta)
+
+            diaComeco = diaComeco + timedelta(days=qtdDias)
             iteracao = iteracao + 1 
         return respostaLista
 

@@ -147,6 +147,25 @@ def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstaco
                 dado = decodeRequestAdotada(resposta)
                 atualiza_adotada(novoArquivo, dado)
 
+def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEstacoes):
+    acess = Acess()
+    acess.lerCredenciais()
+
+    estacoes = _listaEstacoes(pathEstacoes)
+
+    for estacao in estacoes:
+        novoArquivo = 'resultados\\{}-Detalhada-{}-{}.txt'.format(estacao, stringComeco, stringFinal)
+        cria_detalhada(novoArquivo)
+
+        headers = {'Authorization': 'Bearer {}'.format(acess.forceRequestToken())}
+
+        ListalistaRespostas = asyncio.run(acess.requestTelemetricaDetalhadaAsync(int(estacao), stringComeco, stringFinal, headers))
+    
+        for listaResposta in ListalistaRespostas:
+            for resposta in listaResposta:
+                dado = decodeRequestDetalhada(resposta)
+                atualiza_detalhada(novoArquivo, dado)
+
 def main():
     pathConfigs = 'configs.json'
     inicializacao.criaConfigs(pathConfigs)
@@ -159,28 +178,27 @@ def main():
         entradaUser = int(input())
         if(entradaUser==1):
             atualizaCredenciaisAna(pathConfigs)
+
         elif(entradaUser==2):
             operacao = interfaceOperacaoEstacao()
             escreverEstacoes(pathEstacoes, operacao, estacoes=interfaceSolicitarEstacoes())
 
         elif(entradaUser==3): #solicitar um dia para todas as estacoes (Detalhadas)
-            dataComeco = unicaData()
-            solicitarEstacaoDetalhada(dataComeco, pathEstacoes)
+            stringComeco = unicaData()
+            solicitarEstacaoDetalhada(stringComeco, pathEstacoes)
+
         elif(entradaUser==4):
-            dataComeco = unicaData()
-            solicitarEstacaoAdotada(dataComeco, pathEstacoes)
+            stringComeco = unicaData()
+            solicitarEstacaoAdotada(stringComeco, pathEstacoes)
 
         elif(entradaUser==5):
-            dataComeco, dataFinal = datasComecoFinal()
-            solicitarPeriodoDetalhada(dataComeco, dataFinal, pathEstacoes)
+            stringComeco, stringFinal = datasComecoFinal()
+            solicitarPeriodoAsyncDetalhada(stringComeco, stringFinal, pathEstacoes)
 
         elif(entradaUser==6):
-            dataComeco, dataFinal = datasComecoFinal()
-            solicitarPeriodoAdotada(dataComeco, dataFinal, pathEstacoes)
-        
-        elif(entradaUser==7):
             stringComeco, stringFinal = datasComecoFinal()
             solicitarPeriodoAsyncAdotada(stringComeco, stringFinal, pathEstacoes)
+
         else:
             pass
 if __name__ == "__main__":
