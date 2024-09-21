@@ -8,6 +8,16 @@ from manipulacaoArquivos import *
 from assincrono import *
 
 
+def _listaEstacoes(pathEstacoes) -> list:
+    f = open(pathEstacoes, 'r')
+    estacoes = f.read().split('\n')
+    try:
+        estacoes.remove('')
+    except:
+        pass
+    f.close()
+    return estacoes
+
 def atualizaCredenciaisAna(pathConfigs):
     novosDadosDict = interfaceCredenciais()
     
@@ -72,10 +82,7 @@ def solicitarPeriodoAdotada(dataComeco, dataFinal, pathEstacoes):
     acess = Acess()
     acess.lerCredenciais()
 
-    f = open(pathEstacoes, 'r')
-    estacoes = f.read().split('\n')
-    estacoes.remove('')
-    f.close()
+    estacoes = _listaEstacoes(pathEstacoes)
 
     for estacao in estacoes:
         novoArquivo = 'resultados\\{}-Adotada-{}-{}.txt'.format(estacao, dataComeco, dataFinal)
@@ -100,10 +107,7 @@ def solicitarPeriodoDetalhada(dataComeco, dataFinal, pathEstacoes):
     acess = Acess()
     acess.lerCredenciais()
 
-    f = open(pathEstacoes, 'r')
-    estacoes = f.read().split('\n')
-    estacoes.remove('')
-    f.close()
+    estacoes = _listaEstacoes(pathEstacoes)
 
     for estacao in estacoes:
         novoArquivo = 'resultados\\{}-Detalhada-{}-{}.txt'.format(estacao, dataComeco, dataFinal)
@@ -123,6 +127,25 @@ def solicitarPeriodoDetalhada(dataComeco, dataFinal, pathEstacoes):
             dados = decodeRequestAdotada(request.content)
             atualiza_adotada(novoArquivo, dados)
             dataAtual = dataAtual + timedelta(days=1)
+
+def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstacoes):
+    acess = Acess()
+    acess.lerCredenciais()
+
+    estacoes = _listaEstacoes(pathEstacoes)
+
+    for estacao in estacoes:
+        novoArquivo = 'resultados\\{}-Adotada-{}-{}.txt'.format(estacao, stringComeco, stringFinal)
+        cria_adotada(novoArquivo)
+
+        headers = {'Authorization': 'Bearer {}'.format(acess.forceRequestToken())}
+
+        ListalistaRespostas = asyncio.run(acess.requestTelemetricaAdotadaAsync(int(estacao), stringComeco, stringFinal, headers))
+    
+        for listaResposta in ListalistaRespostas:
+            for resposta in listaResposta:
+                dado = decodeRequestAdotada(resposta)
+                atualiza_adotada(novoArquivo, dado)
 
 def main():
     pathConfigs = 'configs.json'
@@ -156,8 +179,8 @@ def main():
             solicitarPeriodoAdotada(dataComeco, dataFinal, pathEstacoes)
         
         elif(entradaUser==7):
-            dataComeco, dataFinal = datasComecoFinal()
-
+            stringComeco, stringFinal = datasComecoFinal()
+            solicitarPeriodoAsyncAdotada(stringComeco, stringFinal, pathEstacoes)
         else:
             pass
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ from acess import *
 
 url = 'https://www.ana.gov.br/hidrowebservice/EstacoesTelemetricas/HidroinfoanaSerieTelemetricaAdotada/v1'  # list of URLs to download
 
-async def download_url(session, url, headers, params, pathArquivo):
+async def download_url(session, url, headers, params):
     async with session.get(url, headers=headers, params=params) as response:
         return await response.content.read()
 
