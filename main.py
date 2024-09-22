@@ -2,11 +2,9 @@ import json
 import os
 from datetime import datetime, timedelta
 import inicializacao
-from acess import Acess
+from acess import *
 from interfaces import *
 from manipulacaoArquivos import *
-from assincrono import *
-
 
 def _listaEstacoes(pathEstacoes) -> list:
     f = open(pathEstacoes, 'r')
