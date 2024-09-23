@@ -24,3 +24,14 @@ def atualiza_detalhada(pathArquivo, listaDados):
         f.write(linha)
     f.close()
 
+
+def escreverEstacoes(pathEstacoes, operacao, estacoes:list):
+    if(operacao == 1):
+        f = open(pathEstacoes, 'w')
+    else:
+        f = open(pathEstacoes, 'a')
+
+    for estacao in estacoes:
+        f.write(estacao+'\n')
+
+    f.close()
