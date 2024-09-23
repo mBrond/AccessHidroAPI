@@ -78,7 +78,7 @@ def solicitarEstacaoDetalhada(dataAtual, pathEstacoes):
         except:
             token = acess.forceRequestToken()
             request = acess.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
-        novoArquivo = 'resultados\\{}-Detalhada.txt'.format(estacao)
+        novoArquivo = 'resultados\\{}-Detalhada-{}.txt'.format(estacao, dataAtual)
         cria_detalhada(novoArquivo)
         dados = decodeRequestDetalhada(request)
         atualiza_detalhada(novoArquivo, dados)
@@ -100,7 +100,7 @@ def solicitarEstacaoAdotada(dataAtual, pathEstacoes):
         except:
             token = acess.forceRequestToken()
             request = acess.requestTelemetricaAdotada(int(estacao), dataAtual, token)
-        novoArquivo = 'resultados\\{}-Adotada.txt'.format(estacao)
+        novoArquivo = 'resultados\\{}-Adotada-{}.txt'.format(estacao, dataAtual)
         cria_adotada(novoArquivo)
         dados = decodeRequestAdotada(request)
         atualiza_adotada(novoArquivo, dados)
@@ -160,7 +160,6 @@ def solicitarPeriodoDetalhada(dataComeco, dataFinal, pathEstacoes):
             dados = decodeRequestAdotada(request)
             atualiza_adotada(novoArquivo, dados)
             dataAtual = dataAtual + timedelta(days=1)
-
 
 def main():
     pathConfigs = 'configs.json'

@@ -83,12 +83,10 @@ class Acess:
     def forceRequestToken(self):
 
         token = self.requestToken()
-        print(token)
         tentativas = 1  #melhorar lógica com TRY-EXCEPT (?)
         while(token.status_code!=200 and tentativas <5):
             token = self.requestToken()  
             tentativas = tentativas+1
-            print(token)
 
         if(token.status_code==200):
             token = json.loads(token.content)
