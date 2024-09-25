@@ -166,7 +166,7 @@ def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEsta
 
 def main():
     pathConfigs = 'configs.json'
-    inicializacao.criaConfigs(pathConfigs)
+    inicializacao.inicializacaoBasico(pathConfigs)
 
     pathEstacoes = 'estacoes.txt'
     
@@ -183,11 +183,17 @@ def main():
 
         elif(entradaUser==3): #solicitar um dia para todas as estacoes (Detalhadas)
             stringComeco = unicaData()
-            solicitarEstacaoDetalhada(stringComeco, pathEstacoes)
+            if(stringComeco):
+                solicitarEstacaoDetalhada(stringComeco, pathEstacoes)
+            else:
+                interfaceDataInvalida()
 
         elif(entradaUser==4):
             stringComeco = unicaData()
-            solicitarEstacaoAdotada(stringComeco, pathEstacoes)
+            if(stringComeco):
+                solicitarEstacaoAdotada(stringComeco, pathEstacoes)
+            else:
+                interfaceDataInvalida()
 
         elif(entradaUser==5):
             stringComeco, stringFinal = datasComecoFinal()

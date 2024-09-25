@@ -10,7 +10,17 @@ def criaConfigs(pathConfigs):
 
         arq.close()
     
+def criaDirResultados():
+    try:
+        os.mkdir('resultados')
+    except:
+        pass
+
 def criaArqEstacoes(pathEstacoes):
     existeArq = os.path.isfile(pathEstacoes)
     if(not existeArq):
         pass
+
+def inicializacaoBasico(pathConfigs):
+    criaConfigs(pathConfigs)
+    criaDirResultados()
