@@ -21,7 +21,7 @@ def _confereComparaDatas(data1, data2):
     return data1<=data2
 
 def interfaceDataInvalida():
-    print('\Insira uma data válida.')
+    print('\nInsira uma data válida.')
 
 def interfaceCredenciais():
     id = input("ID: ")
