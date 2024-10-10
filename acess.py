@@ -57,10 +57,8 @@ class Acess:
         # Valores arbitrários 
         if diasDownload <= 100:
             return 10
-        elif diasDownload < 365:
-            return 100
         else:
-            return 366
+            return 20
 
     def requestTelemetricaDetalhada(self, estacaoCodigo: int, data: str, token: str, intervaloBusca="HORA_24", filtroData = "DATA_LEITURA"):
         """
@@ -125,6 +123,8 @@ class Acess:
         while(token.status_code!=200 and tentativas <5):
             token = self.requestToken()  
             tentativas = tentativas+1
+
+        print(token.status_code)
 
         if(token.status_code==200):
             token = json.loads(token.content)

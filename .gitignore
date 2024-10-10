@@ -2,3 +2,5 @@ configs.json
 resultados
 *.txt
 __pycache__
+build
+dist
