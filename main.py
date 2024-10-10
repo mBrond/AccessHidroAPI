@@ -1,5 +1,3 @@
-import json
-import os
 from datetime import datetime, timedelta
 import inicializacao
 from acess import *
@@ -16,22 +14,9 @@ def _listaEstacoes(pathEstacoes) -> list:
     f.close()
     return estacoes
 
-def atualizaCredenciaisAna(pathConfigs):
+def solicitar_atualizacao_credenciais_ana(pathConfigs):
     novosDadosDict = interfaceCredenciais()
-    
-    arq = open(pathConfigs, 'r+')
-     
-    dataArqStr = arq.read()
-    dataJson = json.loads(dataArqStr)
-    
-    dataJson.update({"Credenciais":{"Ana":{"Identificador":novosDadosDict['id'], "Senha":novosDadosDict['senha']}}})
-
-    #arq.read() faz o ponteiro ir para o final do arquivo, e sendo necessário voltar pro começo para sobre-escrever as modificações
-    arq.seek(0)
-
-    arq.write(json.dumps(dataJson))
-
-    arq.close()
+    atualiza_credenciais_ana(pathConfigs, novosDadosDict)
 
 def solicitarEstacaoDetalhada(dataAtual, pathEstacoes):
     acess = Acess()
@@ -76,56 +61,6 @@ def solicitarEstacaoAdotada(dataAtual, pathEstacoes):
         dados = decodeRequestAdotada(request.content)
         atualiza_adotada(novoArquivo, dados)
 
-def solicitarPeriodoAdotada(dataComeco, dataFinal, pathEstacoes):
-    acess = Acess()
-    acess.lerCredenciais()
-
-    estacoes = _listaEstacoes(pathEstacoes)
-
-    for estacao in estacoes:
-        novoArquivo = 'resultados\\{}-Adotada-{}-{}.txt'.format(estacao, dataComeco, dataFinal)
-        cria_adotada(novoArquivo)
-        
-        token = acess.forceRequestToken()
-        
-        dataAtual = datetime.datetime.strptime(dataComeco, "%Y-%m-%d")
-        dataFinal = datetime.datetime.strptime(dataFinal, "%Y-%m-%d")
-        
-        while(dataAtual != dataFinal):
-            try:
-                request = acess.requestTelemetricaAdotada(int(estacao), dataAtual, token)
-            except:
-                token = acess.forceRequestToken()
-                request = acess.requestTelemetricaAdotada(int(estacao), dataAtual, token)
-            dados = decodeRequestAdotada(request.content)
-            atualiza_adotada(novoArquivo, dados)
-            dataAtual = dataAtual + timedelta(days=1)
-
-def solicitarPeriodoDetalhada(dataComeco, dataFinal, pathEstacoes):
-    acess = Acess()
-    acess.lerCredenciais()
-
-    estacoes = _listaEstacoes(pathEstacoes)
-
-    for estacao in estacoes:
-        novoArquivo = 'resultados\\{}-Detalhada-{}-{}.txt'.format(estacao, dataComeco, dataFinal)
-        cria_detalhada(novoArquivo)
-        
-        token = acess.forceRequestToken()
-        
-        dataAtual = datetime.datetime.strptime(dataComeco, "%Y-%m-%d")
-        dataFinal = datetime.datetime.strptime(dataFinal, "%Y-%m-%d")
-        
-        while(dataAtual != dataFinal):
-            try:
-                request = acess.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
-            except:
-                token = acess.forceRequestToken()
-                request = acess.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
-            dados = decodeRequestAdotada(request.content)
-            atualiza_adotada(novoArquivo, dados)
-            dataAtual = dataAtual + timedelta(days=1)
-
 def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstacoes):
     acess = Acess()
     acess.lerCredenciais()
@@ -164,9 +99,15 @@ def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEsta
                 dado = decodeRequestDetalhada(resposta)
                 atualiza_detalhada(novoArquivo, dado)
 
+def solicitar_leitura_credenciais_ana(pathConfigs):
+    credenciaisAna = le_credenciais_ana(pathConfigs)['Credenciais']['Ana']
+    print(f'\nId:{credenciaisAna['Identificador']}\nSenha: {credenciaisAna['Senha']}')
+
 def main():
     pathConfigs = 'configs.json'
-    inicializacao.inicializacaoBasico(pathConfigs)
+    inicializacao.inicializacao_basico(pathConfigs)
+
+    interfaceVersao()
 
     pathEstacoes = 'estacoes.txt'
     
@@ -175,7 +116,7 @@ def main():
         interfaceMenu()
         entradaUser = int(input())
         if(entradaUser==1):
-            atualizaCredenciaisAna(pathConfigs)
+            solicitar_atualizacao_credenciais_ana(pathConfigs)
 
         elif(entradaUser==2):
             operacao = interfaceOperacaoEstacao()
@@ -202,8 +143,16 @@ def main():
         elif(entradaUser==6):
             stringComeco, stringFinal = datasComecoFinal()
             solicitarPeriodoAsyncAdotada(stringComeco, stringFinal, pathEstacoes)
+        
+        elif(entradaUser==7):
+            solicitar_leitura_credenciais_ana(pathConfigs)
 
         else:
             pass
 if __name__ == "__main__":
-    main()
+    try:
+        main()
+    except Exception as e:
+        print("HOUVE ERRO NA EXECUCAO DO SISTEMA")
+        print(e)
+        input()
