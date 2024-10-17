@@ -10,18 +10,20 @@ def cria_configs(pathConfigs):
 
         arq.close()
     
-def cria_dir_resultados():
+def cria_dir_resultados(pathResultados):
     """Cria pasta 'resultados'"""
     try:
-        os.mkdir('resultados')
+        os.mkdir(pathResultados)
     except:
         pass
 
 def cria_arq_estacoes(pathEstacoes):
     existeArq = os.path.isfile(pathEstacoes)
     if(not existeArq):
-        pass
+        file = open(pathEstacoes, 'w')
+        file.close()
+        
 
-def inicializacao_basico(pathConfigs):
+def inicializacao_basico(pathConfigs, pathResultados):
     cria_configs(pathConfigs)
-    cria_dir_resultados()
+    cria_dir_resultados(pathResultados)

@@ -105,7 +105,8 @@ def solicitar_leitura_credenciais_ana(pathConfigs):
 
 def main():
     pathConfigs = 'configs.json'
-    inicializacao.inicializacao_basico(pathConfigs)
+    pathResultados = 'resultados'
+    inicializacao.inicializacao_basico(pathConfigs, pathResultados)
 
     interfaceVersao()
 

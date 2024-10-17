@@ -1,12 +1,12 @@
-# AcessHidroAPI
+# AccessHidroAPI
 
 ## Sobre 
-Software para requisitar dados da API Hidro Webservice, nomeado Acess Hidro API (AHAPI).
+Software para requisitar dados da API Hidro Webservice, nomeado Access Hidro API (AHAPI).
 
 ## Como Utilizar
 O software realiza requisições para a API de Consulta Hidro Webservice (https://www.ana.gov.br/hidrowebservice/swagger-ui/index.html#/WSEstacoesTelemetricasController). Para tal, é necessário solicitar a criação de um login e senha próprios através do e-mail telemetria@ana.gov.br.
 
-### Utilização do AcessHidroAPI
+### Utilização do AccessHidroAPI
 O programa foi desenvolvido em Python, sendo necessário ter um interpretador desta linguagem instalado no computador do usuário para sua utilização. A inicialização do programa é feita ao rodar o arquivo *main.py*. 
 A interação do usuário se dá por meio de um menu no prompt de comando. As opções são mostradas na tela e são acessíveis através do input do número relacionado a elas.
 

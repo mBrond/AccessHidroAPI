@@ -9,15 +9,19 @@ def _confereEstacaoValida(estacao: str)->bool:
     Returns:
         bool: Verdadeiro se 'estacao' é um código válido.
     """
-    if(len(estacao)!=8):
-        return False
     try:
-        val = int(estacao)
+        estacao = str(estacao)
+        if(len(estacao)!=8):
+            return False
+        try:
+            val = int(estacao)
+        except:
+            return False
+        else:
+            return True
     except:
         return False
-    else:
-        return True
-    
+
 def _confereDataValida(data: str)->bool:
     """Confere se 'data' é uma data existente. 
 
@@ -28,13 +32,10 @@ def _confereDataValida(data: str)->bool:
         bool: Verdadeiro se a data existe
     """
     try:
-        data = datetime.strptime(data, "%Y-%m-%d")
+        data = datetime.datetime.strptime(data, "%Y-%m-%d")
     except:
         return False
     return True
-
-def _confereComparaDatas(data1, data2):
-    return data1<=data2
 
 def interfaceDataInvalida():
     print('\nInsira uma data válida.')
