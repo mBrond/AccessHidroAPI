@@ -40,7 +40,7 @@ def escreverEstacoes(pathEstacoes: str, operacao: int, estacoes:list)->None:
         f = open(pathEstacoes, 'a')
 
     for estacao in estacoes:
-        f.wrtie(f'{estacao}\n')
+        f.write(f'{estacao}\n')
 
     f.close()
 

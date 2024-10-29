@@ -1,6 +1,6 @@
-from datetime import datetime, timedelta
 import inicializacao
-from acess import *
+import asyncio
+from AccessHidroWebService import acess, decodes
 from interfaces import *
 from manipulacaoArquivos import *
 
@@ -15,55 +15,50 @@ def _listaEstacoes(pathEstacoes) -> list:
     return estacoes
 
 def solicitar_atualizacao_credenciais_ana(pathConfigs):
-    novosDadosDict = interfaceCredenciais()
+    novosDadosDict = interfaceCredenciais() #dados na memória
+    
     atualiza_credenciais_ana(pathConfigs, novosDadosDict)
 
 def solicitarEstacaoDetalhada(dataAtual, pathEstacoes):
-    acess = Acess()
-    acess.lerCredenciais()
+    acesso = acess.Acess()
+    acesso.lerCredenciais()
 
-    f = open(pathEstacoes, 'r')
-    estacoes = f.read().split('\n')
-    estacoes.remove('')
-    f.close()
+    estacoes = _listaEstacoes(pathEstacoes)
 
-    token = acess.forceRequestToken()
+    token = acesso.forceRequestToken()
     for estacao in estacoes:
         try:
-            request = acess.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
+            request = acesso.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
         except:
-            token = acess.forceRequestToken()
-            request = acess.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
+            token = acesso.forceRequestToken()
+            request = acesso.requestTelemetricaDetalhada(int(estacao), dataAtual, token)
         novoArquivo = 'resultados\\{}-Detalhada-{}.txt'.format(estacao, dataAtual)
         cria_detalhada(novoArquivo)
-        dados = decodeRequestDetalhada(request.content)
+        dados = decodes.decodeRequestDetalhada(request.content)
         atualiza_detalhada(novoArquivo, dados)
         # atualiza_detalhada(novoArquivo, dados)
 
 def solicitarEstacaoAdotada(dataAtual, pathEstacoes):
-    acess = Acess()
-    acess.lerCredenciais()
+    acesso = acess.Acess()
+    acesso.atualizarCredenciais()
 
-    f = open(pathEstacoes, 'r')
-    estacoes = f.read().split('\n')
-    estacoes.remove('')
-    f.close()
+    estacoes = _listaEstacoes(pathEstacoes)
 
-    token = acess.forceRequestToken()
+    token = acesso.forceRequestToken()
     for estacao in estacoes:
         try:
-            request = acess.requestTelemetricaAdotada(int(estacao), dataAtual, token)
+            request = acesso.requestTelemetricaAdotada(int(estacao), dataAtual, token)
         except:
-            token = acess.forceRequestToken()
-            request = acess.requestTelemetricaAdotada(int(estacao), dataAtual, token)
+            token = acesso.forceRequestToken()
+            request = acesso.requestTelemetricaAdotada(int(estacao), dataAtual, token)
         novoArquivo = 'resultados\\{}-Adotada-{}.txt'.format(estacao, dataAtual)
         cria_adotada(novoArquivo)
-        dados = decodeRequestAdotada(request.content)
+        dados = decodes.decodeRequestAdotada(request.content)
         atualiza_adotada(novoArquivo, dados)
 
 def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstacoes):
-    acess = Acess()
-    acess.lerCredenciais()
+    acesso = acess.Acess()
+    acesso.atualizarCredenciais()
 
     estacoes = _listaEstacoes(pathEstacoes)
 
@@ -71,18 +66,18 @@ def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstaco
         novoArquivo = 'resultados\\{}-Adotada-{}-{}.txt'.format(estacao, stringComeco, stringFinal)
         cria_adotada(novoArquivo)
 
-        headers = {'Authorization': 'Bearer {}'.format(acess.forceRequestToken())}
+        headers = {'Authorization': 'Bearer {}'.format(acesso.forceRequestToken())}
 
-        ListalistaRespostas = asyncio.run(acess.requestTelemetricaAdotadaAsync(int(estacao), stringComeco, stringFinal, headers))
+        ListalistaRespostas = asyncio.run(acesso.requestTelemetricaAdotadaAsync(int(estacao), stringComeco, stringFinal, headers))
     
         for listaResposta in ListalistaRespostas:
             for resposta in listaResposta:
-                dado = decodeRequestAdotada(resposta)
+                dado = decodes.decodeRequestAdotada(resposta)
                 atualiza_adotada(novoArquivo, dado)
 
 def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEstacoes):
-    acess = Acess()
-    acess.lerCredenciais()
+    acesso = acess.Acess()
+    acesso.lerCredenciais()
 
     estacoes = _listaEstacoes(pathEstacoes)
 
@@ -90,13 +85,13 @@ def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEsta
         novoArquivo = 'resultados\\{}-Detalhada-{}-{}.txt'.format(estacao, stringComeco, stringFinal)
         cria_detalhada(novoArquivo)
 
-        headers = {'Authorization': 'Bearer {}'.format(acess.forceRequestToken())}
+        headers = {'Authorization': 'Bearer {}'.format(acesso.forceRequestToken())}
 
-        ListalistaRespostas = asyncio.run(acess.requestTelemetricaDetalhadaAsync(int(estacao), stringComeco, stringFinal, headers))
+        ListalistaRespostas = asyncio.run(acesso.requestTelemetricaDetalhadaAsync(int(estacao), stringComeco, stringFinal, headers))
     
         for listaResposta in ListalistaRespostas:
             for resposta in listaResposta:
-                dado = decodeRequestDetalhada(resposta)
+                dado = decodes.decodeRequestDetalhada(resposta)
                 atualiza_detalhada(novoArquivo, dado)
 
 def solicitar_leitura_credenciais_ana(pathConfigs):

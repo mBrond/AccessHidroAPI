@@ -1,0 +1,3 @@
+[submodule "AccessHidroWebService"]
+	path = AccessHidroWebService
+	url = https://github.com/mBrond/AccessHidroWebService
