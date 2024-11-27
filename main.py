@@ -56,7 +56,7 @@ def solicitarEstacaoAdotada(dataAtual, pathEstacoes):
         dados = decodes.decodeRequestAdotada(request.content)
         atualiza_adotada(novoArquivo, dados)
 
-def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstacoes):
+def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstacoes, qtdDowloadAsync: int):
     acesso = acess.Acess()
     acesso.atualizarCredenciais()
 
@@ -68,14 +68,14 @@ def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstaco
 
         headers = {'Authorization': 'Bearer {}'.format(acesso.forceRequestToken())}
 
-        ListalistaRespostas = asyncio.run(acesso.requestTelemetricaAdotadaAsync(int(estacao), stringComeco, stringFinal, headers))
+        ListalistaRespostas = asyncio.run(acesso.requestTelemetricaAdotadaAsync(int(estacao), stringComeco, stringFinal, headers, qtdDowloadAsync))
     
         for listaResposta in ListalistaRespostas:
             for resposta in listaResposta:
                 dado = decodes.decodeRequestAdotada(resposta)
                 atualiza_adotada(novoArquivo, dado)
 
-def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEstacoes):
+def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEstacoes, qtdDowloadAsync: int):
     acesso = acess.Acess()
     acesso.lerCredenciais()
 
@@ -87,7 +87,7 @@ def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEsta
 
         headers = {'Authorization': 'Bearer {}'.format(acesso.forceRequestToken())}
 
-        ListalistaRespostas = asyncio.run(acesso.requestTelemetricaDetalhadaAsync(int(estacao), stringComeco, stringFinal, headers))
+        ListalistaRespostas = asyncio.run(acesso.requestTelemetricaDetalhadaAsync(int(estacao), stringComeco, stringFinal, headers, qtdDowloadAsync))
     
         for listaResposta in ListalistaRespostas:
             for resposta in listaResposta:
@@ -101,6 +101,7 @@ def solicitar_leitura_credenciais_ana(pathConfigs):
 def main():
     pathConfigs = 'configs.json'
     pathResultados = 'resultados'
+    qtdDowloadAsync = 20
     inicializacao.inicializacao_basico(pathConfigs, pathResultados)
 
     interfaceVersao()
@@ -134,14 +135,17 @@ def main():
 
         elif(entradaUser==5):
             stringComeco, stringFinal = datasComecoFinal()
-            solicitarPeriodoAsyncDetalhada(stringComeco, stringFinal, pathEstacoes)
+            solicitarPeriodoAsyncDetalhada(stringComeco, stringFinal, pathEstacoes, qtdDowloadAsync)
 
         elif(entradaUser==6):
             stringComeco, stringFinal = datasComecoFinal()
-            solicitarPeriodoAsyncAdotada(stringComeco, stringFinal, pathEstacoes)
+            solicitarPeriodoAsyncAdotada(stringComeco, stringFinal, pathEstacoes, qtdDowloadAsync)
         
         elif(entradaUser==7):
             solicitar_leitura_credenciais_ana(pathConfigs)
+
+        elif(entradaUser==8):
+            qtdDowloadAsync = interfaceqtdDowloadAsync(qtdDowloadAsync)
 
         else:
             pass

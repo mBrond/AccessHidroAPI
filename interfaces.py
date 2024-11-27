@@ -62,7 +62,7 @@ def datasComecoFinal(): #FAZER CHECAGEM DE DATAS CORRETAS
 
 def interfaceMenu():
     texto = "\n0. Sair\n1. Atualizar credenciais\n2. Atualizar estacoes\n3. Data única (Detalhada)\n"
-    texto = texto+"4. Data única (Adotada)\n5. Período (Detalhada)\n6. Período (Adotada)\n7. Mostrar credenciais salvas."
+    texto = texto+"4. Data única (Adotada)\n5. Período (Detalhada)\n6. Período (Adotada)\n7. Mostrar credenciais salvas\n8. Alterar quantidade downloads assíncronos"
     print(texto)
 
 def interfaceSolicitarEstacoes():
@@ -90,4 +90,14 @@ def interfaceOperacaoEstacao():
     return int(entrada)
 
 def interfaceVersao():
-    print('-----\n Versão 1.0.1 - Miguel Brondani')
+    print('-----\n Versão 1.0.2 - Miguel Brondani')
+
+def interfaceqtdDowloadAsync(valorAntigo)->int:
+    novoQtdDowloadAsync = input("Qual o novo limite de download assíncrono?")
+    try:
+        novoQtdDowloadAsync = int(novoQtdDowloadAsync)
+        return novoQtdDowloadAsync
+    except:
+        print('Valor inválido')
+        return valorAntigo
+    
