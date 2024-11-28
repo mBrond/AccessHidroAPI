@@ -66,9 +66,19 @@ def atualiza_credenciais_ana(pathConfigs: str, dados: dict)->None:
 
     arq.close()
 
-def le_credenciais_ana(pathConfigs):
+def le_credenciais_ana(pathConfigs)->list:
+    """Lê o arquivo de configuração e retorna as credenciais da ANA salvas nele.
+
+    Args:
+        pathConfigs str: Path para o arquivo de configuracao
+
+    Returns:
+        list: Primeiro item -> identificador, Segundo item -> Senha
+    """
     arq = open(pathConfigs, 'r')
     dataArqStr = arq.read()
     arq.close()
 
-    return json.loads(dataArqStr)
+    dicionario =json.loads(dataArqStr)['Credenciais']['Ana']
+
+    return [ dicionario["Identificador"], dicionario["Senha"]] 

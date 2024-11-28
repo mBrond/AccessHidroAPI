@@ -1,5 +1,6 @@
 import inicializacao
 import asyncio
+import traceback
 from AccessHidroWebService import acess, decodes
 from interfaces import *
 from manipulacaoArquivos import *
@@ -56,9 +57,9 @@ def solicitarEstacaoAdotada(dataAtual, pathEstacoes):
         dados = decodes.decodeRequestAdotada(request.content)
         atualiza_adotada(novoArquivo, dados)
 
-def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstacoes, qtdDowloadAsync: int):
-    acesso = acess.Acess()
-    acesso.atualizarCredenciais()
+def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstacoes: str, pathConfigs: str, qtdDowloadAsync: int):
+    credenciais = le_credenciais_ana(pathConfigs)
+    acesso = acess.Acess(credenciais[0], credenciais[1])
 
     estacoes = _listaEstacoes(pathEstacoes)
 
@@ -75,9 +76,9 @@ def solicitarPeriodoAsyncAdotada(stringComeco: str, stringFinal: str, pathEstaco
                 dado = decodes.decodeRequestAdotada(resposta)
                 atualiza_adotada(novoArquivo, dado)
 
-def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEstacoes, qtdDowloadAsync: int):
-    acesso = acess.Acess()
-    acesso.lerCredenciais()
+def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEstacoes: str, pathConfigs: str, qtdDowloadAsync: int):
+    credenciais = le_credenciais_ana(pathConfigs)
+    acesso = acess.Acess(credenciais[0], credenciais[1])
 
     estacoes = _listaEstacoes(pathEstacoes)
 
@@ -95,8 +96,8 @@ def solicitarPeriodoAsyncDetalhada(stringComeco: str, stringFinal: str, pathEsta
                 atualiza_detalhada(novoArquivo, dado)
 
 def solicitar_leitura_credenciais_ana(pathConfigs):
-    credenciaisAna = le_credenciais_ana(pathConfigs)['Credenciais']['Ana']
-    print(f'\nId:{credenciaisAna['Identificador']}\nSenha: {credenciaisAna['Senha']}')
+    credenciaisAna = le_credenciais_ana(pathConfigs)
+    print(f'\nId: {credenciaisAna[0]}\nSenha: {credenciaisAna[1]}')
 
 def main():
     pathConfigs = 'configs.json'
@@ -119,7 +120,7 @@ def main():
             operacao = interfaceOperacaoEstacao()
             escreverEstacoes(pathEstacoes, operacao, estacoes=interfaceSolicitarEstacoes())
 
-        elif(entradaUser==3): #solicitar um dia para todas as estacoes (Detalhadas)
+        elif(entradaUser==3):
             stringComeco = unicaData()
             if(stringComeco):
                 solicitarEstacaoDetalhada(stringComeco, pathEstacoes)
@@ -135,11 +136,11 @@ def main():
 
         elif(entradaUser==5):
             stringComeco, stringFinal = datasComecoFinal()
-            solicitarPeriodoAsyncDetalhada(stringComeco, stringFinal, pathEstacoes, qtdDowloadAsync)
+            solicitarPeriodoAsyncDetalhada(stringComeco, stringFinal, pathEstacoes, pathConfigs, qtdDowloadAsync)
 
         elif(entradaUser==6):
             stringComeco, stringFinal = datasComecoFinal()
-            solicitarPeriodoAsyncAdotada(stringComeco, stringFinal, pathEstacoes, qtdDowloadAsync)
+            solicitarPeriodoAsyncAdotada(stringComeco, stringFinal, pathEstacoes, pathConfigs, qtdDowloadAsync)
         
         elif(entradaUser==7):
             solicitar_leitura_credenciais_ana(pathConfigs)
@@ -155,4 +156,5 @@ if __name__ == "__main__":
     except Exception as e:
         print("HOUVE ERRO NA EXECUCAO DO SISTEMA")
         print(e)
+        print(traceback.format_exc())
         input()

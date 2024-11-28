@@ -90,7 +90,7 @@ def interfaceOperacaoEstacao():
     return int(entrada)
 
 def interfaceVersao():
-    print('-----\n Versão 1.0.2 - Miguel Brondani')
+    print('-----\n Versão 1.1.0 - Ecotecnologias - Miguel Brondani')
 
 def interfaceqtdDowloadAsync(valorAntigo)->int:
     novoQtdDowloadAsync = input("Qual o novo limite de download assíncrono?")
