@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 def cria_detalhada(pathArquivo):
     f = open(pathArquivo, 'w')
@@ -82,3 +83,9 @@ def le_credenciais_ana(pathConfigs)->list:
     dicionario =json.loads(dataArqStr)['Credenciais']['Ana']
 
     return [ dicionario["Identificador"], dicionario["Senha"]] 
+
+def cria_log(exception, traceback):
+    with open(f'log-{(datetime.now()).strftime('%Y-%m-%d %H-%M-%S')}.txt', 'w') as file:
+        file.write(str(exception))
+        file.write('\nTRACEBACK\n')
+        file.write(traceback)

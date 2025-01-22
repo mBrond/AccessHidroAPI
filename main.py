@@ -153,8 +153,8 @@ def main():
 if __name__ == "__main__":
     try:
         main()
+    
     except Exception as e:
-        print("HOUVE ERRO NA EXECUCAO DO SISTEMA")
-        print(e)
-        print(traceback.format_exc())
+        print("Houve um erro na execução do programa. Verifique o log de atividades para melhores informações")
+        cria_log(e, traceback.format_exc())
         input()
