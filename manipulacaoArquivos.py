@@ -26,7 +26,6 @@ def atualiza_detalhada(pathArquivo, listaDados):
         f.write(linha)
     f.close()
 
-
 def escreverEstacoes(pathEstacoes: str, operacao: int, estacoes:list)->None:
     """Escreve o código das estações no arquivo estacoes.txt
 
