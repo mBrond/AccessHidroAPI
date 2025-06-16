@@ -25,18 +25,21 @@ def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, p
     estacoes = _listaEstacoes(pathEstacoes)
 
     for estacao in estacoes:
-        novoArquivo = 'resultados\\{}-Adotada={}-{}.txt'.format(estacao, stringComeco, stringFinal)
+        novoArquivo = 'resultados\\{}-Adotada-{}-{}.txt'.format(estacao, stringComeco, stringFinal)
         cria_adotada(novoArquivo)
 
         token = sessao.safe_request_token()
         
         if tipo == 'Adotada' or tipo == 'Detalhada':
             listaDicionario = sessao.request_telemetrica(int(estacao), stringComeco, stringFinal, token, tipo)
-        else:
-            listaDicionario = sessao._main_request_convencionais(int(estacao), stringComeco, stringFinal, token, tipo)
+        elif tipo == 'Cota':
+            listaDicionario = sessao.request_cota(int(estacao), stringComeco, stringFinal, token)
+        elif tipo == 'Sedimentos':
+            listaDicionario = sessao.request_sedimentos(int(estacao), stringComeco, stringFinal, token)
+        elif tipo == 'Chuva':
+            listaDicionario = sessao.request_chuva(int(estacao), stringComeco, stringFinal, token)
 
-        for dadosDiarios in listaDicionario:
-            atualiza_adotada(novoArquivo, dadosDiarios)
+        atualiza_adotada(novoArquivo, listaDicionario)
 
 def solicitar_leitura_credenciais_ana(pathConfigs):
     credenciaisAna = le_credenciais_ana(pathConfigs)

@@ -1,17 +1,21 @@
 from tkinter import *
 from tkinter import PhotoImage
 from tkinter import filedialog
+from tkcalendar import DateEntry
+
 import manipulacaoArquivos
+import main
 
 
 
 class Application:
-    def __init__(self, root, versaoSoftware, pathConfigs, pathResults, titulo):
+    def __init__(self, root, versaoSoftware, pathConfigs, pathResults, pathEstacoes, titulo):
         self.root = root
         self.versaoSoftware = versaoSoftware
         self.pathConfigs = pathConfigs
         self.pathResults = pathResults
-        
+        self.pathEstacoes = pathEstacoes
+
         self.tipo = StringVar()  # Changed to StringVar()
 
         self.root.title(titulo)
@@ -32,7 +36,7 @@ class Application:
         Radiobutton(self.root, text="Convencionas de Cota", variable=self.tipo, value="Cota").pack(anchor='w')
         Radiobutton(self.root, text="Convencionais de Sendimentos", variable=self.tipo, value="Sedimentos").pack(anchor='w')
 
-        Button(self.root, text="Baixar estacoes", command=lambda: self.interface_baixar_estacoes(self.tipo)).pack(anchor='w')
+        Button(self.root, text="Baixar estacoes", command=self.interface_baixar_estacoes).pack(anchor='w')
 
     def interface_atualizar_credenciais(self):
 
@@ -58,7 +62,7 @@ class Application:
         
     
     def interface_atulizar_estacoes(self):
-        novaJanela = Toplevel(root)
+        novaJanela = Toplevel(self.root)
         novaJanela.title("Atualizando estacoes")
         novaJanela.geometry("250x150")
         novaJanela.configure(bg="#DFF9CA")
@@ -86,12 +90,30 @@ class Application:
 
         Button(novaJanela, text="Selecionar arquivo", command=select_file).pack()
 
-    def interface_baixar_estacoes(self, tipo):
-        # Add logic here
-        print(f"Tipo selecionado: {tipo.get()}")
+
+    def interface_baixar_estacoes(self):
+        novaJanela = Toplevel(root)
+        novaJanela.title("Baixando")
+        novaJanela.geometry("250x150")
+        novaJanela.configure(bg="#DFF9CA")
+
+        calendarioComeco = DateEntry(novaJanela, date_pattern='yyyy-mm-dd')
+        calendarioComeco.pack()
+
+        calendarioFinal = DateEntry(novaJanela, date_pattern='yyyy-mm-dd')
+        calendarioFinal.pack()
+
+        def solicitar_estacao():
+            dataComeco = calendarioComeco.get()
+            dataFinal = calendarioFinal.get()
+
+            main.solicitar_estacoes(dataComeco, dataFinal, self.pathEstacoes, self.pathConfigs, self.tipo.get())
+
+        Button(novaJanela, text="Confirmar", command=solicitar_estacao).pack()
+
 
 if __name__ == "__main__":
     root = Tk()
     root.geometry("600x400")  # Tamanho da janela
-    app = Application(root, "1.0", "configs.json", "resultados/", "AHAPI")
+    app = Application(root, "1.0", "configs.json", "resultados/", "estacoes.txt","AHAPI")
     root.mainloop()
