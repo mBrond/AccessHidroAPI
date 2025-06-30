@@ -12,16 +12,14 @@ def cria_configs(pathConfigs):
     
 def cria_dir_resultados(pathResultados):
     """Cria pasta 'resultados'"""
-    try:
-        os.mkdir(pathResultados)
-    except:
-        pass
+    os.makedirs(pathResultados, exist_ok=True)
 
-def cria_arq_estacoes(pathEstacoes):
-    existeArq = os.path.isfile(pathEstacoes)
-    if(not existeArq):
-        file = open(pathEstacoes, 'w')
-        file.close()
+
+# def cria_arq_estacoes(pathEstacoes): # em utilização ?????
+#     existeArq = os.path.isfile(pathEstacoes)
+#     if(not existeArq):
+#         file = open(pathEstacoes, 'w')
+#         file.close()
         
 
 def inicializacao_basico(pathConfigs, pathResultados):
