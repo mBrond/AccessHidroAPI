@@ -4,7 +4,7 @@ from manipulacaoArquivos import cria_log
 from interfaceGrafica import Application
 from tkinter import Tk
 
-def gerenciador(pathConfigs, pathResultados, pathEstacoes, tituloJanela, qtdDownloadAsync):
+def gerenciador(pathConfigs, pathResultados, pathEstacoes, tituloJanela, qtdDownloadAsync, versao):
     inicializacao.inicializacao_basico(pathConfigs, pathResultados)
 
     pathEstacoes = 'estacoes.txt'
@@ -23,7 +23,7 @@ if __name__ == "__main__":
     
     versao = "1.1.0"
     try:
-        gerenciador(pathConfigs, pathResultados, pathEstacoes, tituloJanela, qtdDownloadAsync)
+        gerenciador(pathConfigs, pathResultados, pathEstacoes, tituloJanela, qtdDownloadAsync, versao)
     
     except Exception as e:
         print("Houve um erro na execução do programa. Verifique o log de atividades para melhores informações")
