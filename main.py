@@ -5,13 +5,12 @@ from interfaceGrafica import Application
 from tkinter import Tk
 
 def gerenciador(pathConfigs, pathResultados, pathEstacoes, tituloJanela, qtdDownloadAsync, versao):
-    inicializacao.inicializacao_basico(pathConfigs, pathResultados)
+    inicializacao.inicializacao_basico(pathConfigs, pathResultados, pathEstacoes)
 
-    pathEstacoes = 'estacoes.txt'
-    root = Tk()
-    root.geometry("600x450")
-    app = Application(root, versao, pathConfigs, pathResultados, pathEstacoes, tituloJanela, qtdDownloadAsync)
-    root.mainloop()
+    janelaRoot = Tk()
+    janelaRoot.geometry("600x450")
+    app = Application(janelaRoot, versao, pathConfigs, pathResultados, pathEstacoes, tituloJanela, qtdDownloadAsync)
+    janelaRoot.mainloop()
 
 if __name__ == "__main__":
     pathLogs = 'logs'
@@ -20,12 +19,11 @@ if __name__ == "__main__":
     pathEstacoes = 'estacoes.txt'
     tituloJanela = 'AHAPI'
     qtdDownloadAsync = 20
-    
     versao = "1.1.0"
+    
     try:
         gerenciador(pathConfigs, pathResultados, pathEstacoes, tituloJanela, qtdDownloadAsync, versao)
-    
-    except Exception as e:
+    except Exception as erro:
         print("Houve um erro na execução do programa. Verifique o log de atividades para melhores informações")
-        cria_log(e, traceback.format_exc(), pathLogs)
+        cria_log(erro, traceback.format_exc(), pathLogs)
         input()
