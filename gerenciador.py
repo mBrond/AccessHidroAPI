@@ -1,27 +1,27 @@
 from hidroaccess.access import Access
 from manipulacaoArquivos import *
 
-def _listaEstacoes(pathEstacoes) -> list:
-    f = open(pathEstacoes, 'r')
-    estacoes = f.read().split('\n')
+def _lista_estacoes(pathEstacoes) -> list:
+    arquivo = open(pathEstacoes, 'r')
+    listaEstacoes = arquivo.read().split('\n')
     try:
-        estacoes.remove('')
+        listaEstacoes.remove('')
     except:
         pass
-    f.close()
-    return estacoes
+    arquivo.close()
+    return listaEstacoes
 
-def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, pathConfigs:str, tipo: str, qtdDownloadAsync: int):
+def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, pathConfigs: str, tipo: str, qtdDownloadAsync: int):
     credenciais = le_credenciais_ana(pathConfigs)
     sessao = Access(credenciais[0], credenciais[1])
-    estacoes = _listaEstacoes(pathEstacoes)
+    estacoes = _lista_estacoes(pathEstacoes)
 
     for estacao in estacoes:
-        novoArquivo = 'resultados\\{}-{}-{}-{}.txt'.format(estacao, tipo, stringComeco, stringFinal)
-        cria_arquivo_resultado(novoArquivo, tipo)
+        caminhoArquivo = f'resultados\\{estacao}-{tipo}-{stringComeco}-{stringFinal}.txt'
+        cria_arquivo_resultado(caminhoArquivo, tipo)
 
         token = sessao.safe_request_token()
-        
+
         if tipo == 'Adotada' or tipo == 'Detalhada':
             listaDicionario = sessao.request_telemetrica(int(estacao), stringComeco, stringFinal, token, tipo, qtdDownloadAsync)    
         elif tipo == 'Cota':
@@ -31,4 +31,4 @@ def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, p
         elif tipo == 'Chuva':
             listaDicionario = sessao.request_chuva(int(estacao), stringComeco, stringFinal, token, qtdDownloadAsync)
 
-        atualizar_arquivo_resultado(novoArquivo, listaDicionario, tipo)
+        atualizar_arquivo_resultado(caminhoArquivo, listaDicionario, tipo)
