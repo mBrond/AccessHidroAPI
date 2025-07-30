@@ -11,13 +11,14 @@ def _lista_estacoes(pathEstacoes) -> list:
     arquivo.close()
     return listaEstacoes
 
-def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, pathConfigs: str, tipo: str, qtdDownloadAsync: int):
+def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, pathConfigs: 
+    str, tipo: str, qtdDownloadAsync: int, pathDownload: str):
     credenciais = le_credenciais_ana(pathConfigs)
     sessao = Access(credenciais[0], credenciais[1])
     estacoes = _lista_estacoes(pathEstacoes)
 
     for estacao in estacoes:
-        caminhoArquivo = f'resultados\\{estacao}-{tipo}-{stringComeco}-{stringFinal}.txt'
+        caminhoArquivo = f'{pathDownload}\\{estacao}-{tipo}-{stringComeco}-{stringFinal}.txt'
         cria_arquivo_resultado(caminhoArquivo, tipo)
 
         token = sessao.safe_request_token()
