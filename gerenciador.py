@@ -37,6 +37,8 @@ def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, p
             cria_arquivo_resultado(caminhoArquivo, tipo)
 
             token = sessao.safe_request_token()
+            if token == '-1':
+                raise ValueError("Token de autenticação inválido. Confira credenciais") 
 
             if tipo == 'Adotada' or tipo == 'Detalhada':
                 listaDicionario = sessao.request_telemetrica(int(estacao), stringComeco, stringFinal, token, tipo, qtdDownloadAsync)    

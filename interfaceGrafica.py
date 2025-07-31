@@ -242,7 +242,6 @@ class Application:
             show_message=True
         )
 
-
     def visualizar_estacoes(self):
         def criar_interface():
             def ler_estacoes():
