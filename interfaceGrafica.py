@@ -5,6 +5,7 @@ import manipulacaoArquivos
 from gerenciador import solicitar_estacoes
 import os
 import traceback
+from error_handler import error_handler
 
 BG_COLOR = "#DFF9CA"
 COLOR_VERDE = "#4CAF50"
@@ -21,6 +22,7 @@ class Application:
         self.pathEstacoes = pathEstacoes
         self.qtdDownloadAsync = qtdDownloadAsync
         self.pathLogs = pathLogs
+        self.pathResultados = 'resultados'
 
         self.tipo = StringVar()
         self.tipo.set("Adotada")
@@ -48,30 +50,34 @@ class Application:
         Button(mainFrame, text="Baixar estacoes", command=self.interface_baixar_estacoes, bg=COLOR_VERDE, fg=BTN_TEXT_COLOR).pack(pady=5, padx=10, fill=X)
 
     def carregar_logo(self):
-        caminhoLogo = os.path.join(os.path.dirname(__file__), "img", "Logo.png")
-        try:
+        def carregar():
+            caminhoLogo = os.path.join(os.path.dirname(__file__), "img", "Logo.png")
             logoImg = PhotoImage(file=caminhoLogo)
             logoLabel = Label(self.root, image=logoImg, bg=BG_COLOR)
             logoLabel.image = logoImg
             logoLabel.pack(pady=10)
-        except Exception as erro:
-            print("Erro ao carregar logo:", erro)
+        
+        error_handler.safe_execute(
+            carregar,
+            context="carregamento da logo",
+            show_message=False,
+            log_level="WARNING"
+        )
 
     def interface_atualizar_credenciais(self):
-        try:
-            def confirmar_credenciais():
-                try:
-                    dados = {'id': loginEntry.get(), 'senha': senhaEntry.get()}
-                    manipulacaoArquivos.atualiza_credenciais_ana(self.pathConfigs, dados)
-                    messagebox.showinfo("Sucesso", "Credenciais atualizadas!")
-                except Exception as erro:
-                    messagebox.showerror("Erro", f"Não foi possível atualizar as credenciais. Confira o log mais recente na pasta ' {self.pathLogs}' para mais informações.\n")
-                    manipulacaoArquivos.cria_log(erro, traceback.format_exc(), self.pathLogs)
+        def confirmar_credenciais():
+            def atualizar_credenciais():
+                dados = {'id': loginEntry.get(), 'senha': senhaEntry.get()}
+                manipulacaoArquivos.atualiza_credenciais_ana(self.pathConfigs, dados)
+                messagebox.showinfo("Sucesso", "Credenciais atualizadas!")
+            
+            error_handler.safe_execute(
+                atualizar_credenciais,
+                context="atualização de credenciais",
+                show_message=True
+            )
 
-            def fechar_janela_credenciais():
-                janelaCredenciais.destroy()
-                self.janela_atual = None
-
+        def criar_interface():
             janelaCredenciais = Toplevel(self.root)
             self.janela_atual = janelaCredenciais 
             janelaCredenciais.title("Atualizando credenciais")
@@ -88,14 +94,23 @@ class Application:
             senhaEntry = Entry(janelaCredenciais, show='*', width=30)
             senhaEntry.pack(pady=5)
 
+            def fechar_janela_credenciais():
+                janelaCredenciais.destroy()
+                self.janela_atual = None
+
             Button(janelaCredenciais, text="Confirmar", command=confirmar_credenciais, bg=COLOR_VERDE, fg=BTN_TEXT_COLOR).pack(pady=10)
             Button(janelaCredenciais, text="Voltar", command=fechar_janela_credenciais, bg=COLOR_RED, fg="white").pack(pady=5)
-        except Exception as erro:
-            messagebox.showerror("Erro", f"Não foi possível abrir a interface de atualização de credenciais. Confira o log mais recente na pasta ' {self.pathLogs}' para mais informações.\n")
-            manipulacaoArquivos.cria_log(erro, traceback.format_exc(), self.pathLogs)
+            
+            return janelaCredenciais
+
+        error_handler.safe_execute(
+            criar_interface,
+            context="criação da interface de credenciais",
+            show_message=True
+        )
 
     def interface_atualizar_estacoes(self):
-        try:
+        def criar_interface():
             janelaAtualizar = Toplevel(self.root)
             self.janela_atual = janelaAtualizar
             janelaAtualizar.title("Atualizando estações")
@@ -116,7 +131,7 @@ class Application:
             textArea.pack(pady=5)
 
             def atualizar_arquivo_estacoes():
-                try:
+                def processar_estacoes():
                     estacoesFinais = set()
                     estacoesExistentes = set()
                     estacoesNovas = set()
@@ -149,9 +164,12 @@ class Application:
 
                     textArea.delete("1.0", END)
                     messagebox.showinfo("Sucesso", "Estações atualizadas!")
-                except Exception as erro:
-                    messagebox.showerror("Erro", f"Não foi possível atualizar as estações. Confira o log mais recente na pasta ' {self.pathLogs}' para mais informações.\n")
-                    manipulacaoArquivos.cria_log(erro, traceback.format_exc(), self.pathLogs)
+                
+                error_handler.safe_execute(
+                    processar_estacoes,
+                    context="atualização de arquivo de estações",
+                    show_message=True
+                )
 
             def fechar_janela_atualizar():
                 janelaAtualizar.destroy()
@@ -159,12 +177,17 @@ class Application:
 
             Button(janelaAtualizar, text="Atualizar", command=atualizar_arquivo_estacoes, bg=COLOR_VERDE, fg=BTN_TEXT_COLOR).pack(pady=10)
             Button(janelaAtualizar, text="Fechar", command=fechar_janela_atualizar, bg=COLOR_RED, fg="white").pack(pady=5)
-        except Exception as erro:
-            messagebox.showerror("Erro", f"Não foi possível abrir a interface de atualização de estações. Confira o log mais recente na pasta ' {self.pathLogs}' para mais informações.\n")
-            manipulacaoArquivos.cria_log(erro, traceback.format_exc(), self.pathLogs)
+            
+            return janelaAtualizar
+
+        error_handler.safe_execute(
+            criar_interface,
+            context="criação da interface de atualização de estações",
+            show_message=True
+        )
 
     def interface_baixar_estacoes(self):
-        try:
+        def criar_interface():
             janelaBaixar = Toplevel(self.root)
             self.janela_atual = janelaBaixar 
             janelaBaixar.title("Baixando")
@@ -182,23 +205,28 @@ class Application:
             calendarioFim.pack(pady=5)
 
             def solicitar_estacao():
-                try:
+                def fazer_download():
                     dataInicio = calendarioInicio.get()
                     dataFim = calendarioFim.get()
                     
                     #diretorio do tipo de estacao
-                    pathDownload = f'{self.pathEstacoes}\\{self.tipo.get()}'
+                    pathDownload = f'{self.pathResultados}\\{self.tipo.get()}'
                     os.makedirs(pathDownload, exist_ok=True) 
 
                     solicitar_estacoes(dataInicio, dataFim, self.pathEstacoes, self.pathConfigs, self.tipo.get(), self.qtdDownloadAsync, pathDownload)
-
-                except ValueError as erro:
-                    messagebox.showerror("Erro", f"Não foi possível solicitar o download das estações. Confirme as credenciais de acesso ao sistema, ou confira o log mais recente na pasta ' {self.pathLogs}' para mais informações.\n")
-                    manipulacaoArquivos.cria_log(erro, traceback.format_exc(), self.pathLogs)
-
-                except Exception as erro:
-                    messagebox.showerror("Erro", f"Não foi possível solicitar o download das estações. Confira o log mais recente na pasta ' {self.pathLogs}' para mais informações.\n")
-                    manipulacaoArquivos.cria_log(erro, traceback.format_exc(), self.pathLogs)
+                
+                try:
+                    error_handler.safe_execute(
+                        fazer_download,
+                        context="download de estações",
+                        show_message=True
+                    )
+                except ValueError as error:
+                    error_handler.handle_error(
+                        error,
+                        context="download de estações",
+                        custom_message="Não foi possível solicitar o download das estações. Confirme as credenciais de acesso ao sistema."
+                    )
 
             def fechar_janela_baixar():
                 janelaBaixar.destroy()
@@ -206,16 +234,30 @@ class Application:
 
             Button(janelaBaixar, text="Confirmar", command=solicitar_estacao, bg=COLOR_VERDE, fg=BTN_TEXT_COLOR).pack(pady=10)
             Button(janelaBaixar, text="Fechar", command=fechar_janela_baixar, bg=COLOR_RED, fg="white").pack(pady=5)
+            
+            return janelaBaixar
 
-        except Exception as erro:
-            messagebox.showerror("Erro", f"Não foi possível abrir a interface de download das estações. Confira o log mais recente na pasta ' {self.pathLogs}' para mais informações.\n")
-            manipulacaoArquivos.cria_log(erro, traceback.format_exc(), self.pathLogs)
+        error_handler.safe_execute(
+            criar_interface,
+            context="criação da interface de download de estações",
+            show_message=True
+        )
 
 
     def visualizar_estacoes(self):
-        try:
-            with open(self.pathEstacoes, 'r') as arquivo:
-                linhasEstacoes = [linha.strip() for linha in arquivo if linha.strip()]
+        def criar_interface():
+            def ler_estacoes():
+                with open(self.pathEstacoes, 'r') as arquivo:
+                    return [linha.strip() for linha in arquivo if linha.strip()]
+            
+            linhasEstacoes = error_handler.safe_execute(
+                ler_estacoes,
+                context="leitura de arquivo de estações",
+                show_message=False
+            )
+            
+            if linhasEstacoes is None:
+                linhasEstacoes = []
 
             janelaEstacoes = Toplevel(self.root)
             janelaEstacoes.title("Estações para download")
@@ -234,13 +276,20 @@ class Application:
                 checkVars.append((var, linha))
 
             def remover_estacoes():
-                novasLinhas = [linha for var, linha in checkVars if not var.get()]
-                with open(self.pathEstacoes, 'w') as arquivo:
-                    for linha in novasLinhas:
-                        arquivo.write(linha + '\n')
-                janelaEstacoes.destroy()
-                self.janela_atual = None 
-                messagebox.showinfo("Sucesso", "Estações removidas com sucesso!")
+                def processar_remocao():
+                    novasLinhas = [linha for var, linha in checkVars if not var.get()]
+                    with open(self.pathEstacoes, 'w') as arquivo:
+                        for linha in novasLinhas:
+                            arquivo.write(linha + '\n')
+                    janelaEstacoes.destroy()
+                    self.janela_atual = None 
+                    messagebox.showinfo("Sucesso", "Estações removidas com sucesso!")
+                
+                error_handler.safe_execute(
+                    processar_remocao,
+                    context="remoção de estações",
+                    show_message=True
+                )
 
             def fechar_janela_estacoes():
                 janelaEstacoes.destroy()
@@ -248,7 +297,11 @@ class Application:
 
             Button(janelaEstacoes, text="Remover selecionadas", command=remover_estacoes, bg=COLOR_BLUE, fg="white").pack(pady=5)
             Button(janelaEstacoes, text="Fechar", command=fechar_janela_estacoes, bg=COLOR_RED, fg="white").pack(pady=5)
+            
+            return janelaEstacoes
 
-        except Exception as erro:
-            messagebox.showerror("Erro", f"Não foi possível realizar a operação. Confira o log mais recente em{self.pathLogs} para mais informações.\n")
-            manipulacaoArquivos.cria_log(erro, traceback.format_exc(), self.pathLogs)
+        error_handler.safe_execute(
+            criar_interface,
+            context="criação da interface de visualização de estações",
+            show_message=True
+        )

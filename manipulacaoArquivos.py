@@ -1,6 +1,7 @@
 import json
 from datetime import datetime
 import os
+from error_handler import error_handler
 
 def get_chaves_dicts_str(tipo: str) -> str:
     """Retorna uma string com as chaves dos dicionários de cada tipo de estação separadas por ponto e vírgula"""
@@ -127,20 +128,34 @@ def escrever_estacoes(path_estacoes: str, operacao: int, estacoes: list) -> None
 
 def atualiza_credenciais_ana(path_configs: str, dados: dict) -> None:
     """Atualiza o arquivo de configuração com as credenciais em 'dados'"""
-    with open(path_configs, "r+") as f:
-        data_json = json.load(f)
-        data_json["Credenciais"] = {"Ana": {"Identificador": dados['id'], "Senha": dados['senha']}}
+    def atualizar():
+        with open(path_configs, "r+") as f:
+            data_json = json.load(f)
+            data_json["Credenciais"] = {"Ana": {"Identificador": dados['id'], "Senha": dados['senha']}}
 
-        f.seek(0)
-        f.write(json.dumps(data_json))
-        f.truncate()
+            f.seek(0)
+            f.write(json.dumps(data_json))
+            f.truncate()
+    
+    error_handler.safe_execute(
+        atualizar,
+        context="atualização de credenciais ANA",
+        show_message=False
+    )
 
 def le_credenciais_ana(path_configs: str) -> list:
     """Lê o arquivo de configuração e retorna as credenciais da ANA"""
-    with open(path_configs, 'r') as f:
-        dados = json.load(f)
-    cred = dados['Credenciais']['Ana']
-    return [cred["Identificador"], cred["Senha"]]
+    def ler():
+        with open(path_configs, 'r') as f:
+            dados = json.load(f)
+        cred = dados['Credenciais']['Ana']
+        return [cred["Identificador"], cred["Senha"]]
+    
+    return error_handler.safe_execute(
+        ler,
+        context="leitura de credenciais ANA",
+        show_message=False
+    )
 
 def cria_log(exception, trace, path_dir: str):
     """Cria um log de erro contendo a exceção e o traceback"""
