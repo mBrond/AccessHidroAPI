@@ -4,7 +4,6 @@ from tkcalendar import DateEntry
 import manipulacaoArquivos
 from gerenciador import solicitar_estacoes
 import os
-import traceback
 from error_handler import error_handler
 
 BG_COLOR = "#DFF9CA"
@@ -22,7 +21,7 @@ class Application:
         self.pathEstacoes = pathEstacoes
         self.qtdDownloadAsync = qtdDownloadAsync
         self.pathLogs = pathLogs
-        self.pathResultados = 'resultados'
+        self.pathResultados = pathResults
 
         self.tipo = StringVar()
         self.tipo.set("Adotada")
@@ -65,18 +64,6 @@ class Application:
         )
 
     def interface_atualizar_credenciais(self):
-        def confirmar_credenciais():
-            def atualizar_credenciais():
-                dados = {'id': loginEntry.get(), 'senha': senhaEntry.get()}
-                manipulacaoArquivos.atualiza_credenciais_ana(self.pathConfigs, dados)
-                messagebox.showinfo("Sucesso", "Credenciais atualizadas!")
-            
-            error_handler.safe_execute(
-                atualizar_credenciais,
-                context="atualização de credenciais",
-                show_message=True
-            )
-
         def criar_interface():
             janelaCredenciais = Toplevel(self.root)
             self.janela_atual = janelaCredenciais 
@@ -93,6 +80,18 @@ class Application:
             Label(janelaCredenciais, text="Nova senha:", bg=BG_COLOR).pack(pady=5)
             senhaEntry = Entry(janelaCredenciais, show='*', width=30)
             senhaEntry.pack(pady=5)
+
+            def confirmar_credenciais():
+                def atualizar_credenciais():
+                    dados = {'id': loginEntry.get(), 'senha': senhaEntry.get()}
+                    manipulacaoArquivos.atualiza_credenciais_ana(self.pathConfigs, dados)
+                    messagebox.showinfo("Sucesso", "Credenciais atualizadas!")
+                
+                error_handler.safe_execute(
+                    atualizar_credenciais,
+                    context="atualização de credenciais",
+                    show_message=True
+                )
 
             def fechar_janela_credenciais():
                 janelaCredenciais.destroy()
