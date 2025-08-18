@@ -5,6 +5,8 @@ import manipulacaoArquivos
 from gerenciador import solicitar_estacoes
 import os
 from error_handler import error_handler
+import threading
+from tkinter.ttk import Progressbar
 
 BG_COLOR = "#DFF9CA"
 COLOR_VERDE = "#4CAF50"
@@ -190,7 +192,7 @@ class Application:
             janelaBaixar = Toplevel(self.root)
             self.janela_atual = janelaBaixar 
             janelaBaixar.title("Baixando")
-            janelaBaixar.geometry("300x200")
+            janelaBaixar.geometry("300x300")
             janelaBaixar.configure(bg=BG_COLOR)
             janelaBaixar.transient(self.root)
             janelaBaixar.grab_set()
@@ -203,7 +205,15 @@ class Application:
             calendarioFim = DateEntry(janelaBaixar, date_pattern='yyyy-mm-dd')
             calendarioFim.pack(pady=5)
 
+            # Barra de progresso e status serão exibidos apenas após clicar em Baixar
+
             def solicitar_estacao():
+                # Criar e exibir barra de progresso e rótulo de status somente após o clique
+                progress = Progressbar(janelaBaixar, mode="determinate", length=250)
+                progress.pack(pady=15)
+
+                statusLabel = Label(janelaBaixar, text="", bg=BG_COLOR)
+                statusLabel.pack(pady=5)
                 def fazer_download():
                     dataInicio = calendarioInicio.get()
                     dataFim = calendarioFim.get()
@@ -212,26 +222,54 @@ class Application:
                     pathDownload = f'{self.pathResultados}\\{self.tipo.get()}'
                     os.makedirs(pathDownload, exist_ok=True) 
 
-                    solicitar_estacoes(dataInicio, dataFim, self.pathEstacoes, self.pathConfigs, self.tipo.get(), self.qtdDownloadAsync, pathDownload)
+                    def on_progress(atual: int, total: int, estacao: str):
+                        def _update():
+                            if total > 0:
+                                progress.configure(maximum=total)
+                            progress['value'] = atual
+                            if estacao:
+                                statusLabel.config(text=f"Baixando {atual}/{total} - Estação {estacao}")
+                            else:
+                                statusLabel.config(text=f"Preparando download (0/{total})")
+                        # garantir atualização no thread da UI
+                        statusLabel.after(0, _update)
+
+                    try:
+                        solicitar_estacoes(
+                            dataInicio,
+                            dataFim,
+                            self.pathEstacoes,
+                            self.pathConfigs,
+                            self.tipo.get(),
+                            self.qtdDownloadAsync,
+                            pathDownload,
+                            on_progress=on_progress
+                        )
+                        statusLabel.config(text="Download concluído")
+                        # garantir barra completa ao final
+                        try:
+                            progress['value'] = progress['maximum']
+                        except Exception:
+                            pass
+                    except Exception as error:
+                        error_handler.handle_error(
+                            error,
+                            context="solicitação de estações",
+                            custom_message="Erro durante a solicitação dos dados das estações"
+                        )
+                    finally:
+                        pass
                 
-                try:
-                    error_handler.safe_execute(
-                        fazer_download,
-                        context="download de estações",
-                        show_message=True
-                    )
-                except ValueError as error:
-                    error_handler.handle_error(
-                        error,
-                        context="download de estações",
-                        custom_message="Não foi possível solicitar o download das estações. Confirme as credenciais de acesso ao sistema."
-                    )
+                statusLabel.config(text="Iniciando downloads...")
+                t= threading.Thread(target=fazer_download, daemon=True)
+                t.start()
+                
 
             def fechar_janela_baixar():
                 janelaBaixar.destroy()
                 self.janela_atual = None
 
-            Button(janelaBaixar, text="Confirmar", command=solicitar_estacao, bg=COLOR_VERDE, fg=BTN_TEXT_COLOR).pack(pady=10)
+            Button(janelaBaixar, text="Baixar estações", command=solicitar_estacao, bg=COLOR_VERDE, fg=BTN_TEXT_COLOR).pack(pady=5)
             Button(janelaBaixar, text="Fechar", command=fechar_janela_baixar, bg=COLOR_RED, fg="white").pack(pady=5)
             
             return janelaBaixar

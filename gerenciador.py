@@ -1,6 +1,7 @@
 from hidroaccess.access import Access
 from manipulacaoArquivos import *
 from error_handler import error_handler
+from typing import Callable, Optional
 
 def _lista_estacoes(pathEstacoes) -> list:
     def ler_estacoes():
@@ -20,7 +21,7 @@ def _lista_estacoes(pathEstacoes) -> list:
     )
 
 def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, pathConfigs: 
-    str, tipo: str, qtdDownloadAsync: int, pathDownload: str):
+    str, tipo: str, qtdDownloadAsync: int, pathDownload: str, on_progress: Optional[Callable[[int, int, str], None]] = None):
     def processar_estacoes():
         credenciais = le_credenciais_ana(pathConfigs)
         if credenciais is None:
@@ -32,7 +33,14 @@ def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, p
         if estacoes is None:
             raise ValueError("Não foi possível ler a lista de estações")
 
-        for estacao in estacoes:
+        total_estacoes = len(estacoes)
+        if on_progress is not None:
+            try:
+                on_progress(0, total_estacoes, "")
+            except Exception:
+                pass
+
+        for indice, estacao in enumerate(estacoes, start=1):
             caminhoArquivo = f'{pathDownload}\\{estacao}-{tipo}-{stringComeco}-{stringFinal}.txt'
             cria_arquivo_resultado(caminhoArquivo, tipo)
 
@@ -50,6 +58,11 @@ def solicitar_estacoes(stringComeco: str, stringFinal: str, pathEstacoes: str, p
                 listaDicionario = sessao.request_chuva(int(estacao), stringComeco, stringFinal, token, qtdDownloadAsync)
 
             atualizar_arquivo_resultado(caminhoArquivo, listaDicionario, tipo)
+            if on_progress is not None:
+                try:
+                    on_progress(indice, total_estacoes, estacao)
+                except Exception:
+                    pass
     
     error_handler.safe_execute(
         processar_estacoes,
