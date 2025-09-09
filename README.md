@@ -1,37 +1,142 @@
-# AccessHidroAPI
+# AccessHidroAPI (AHAPI)
+![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14759294.svg)](https://doi.org/10.5281/zenodo.14759294)
 
-## Sobre 
-Software para requisitar dados da API Hidro Webservice, nomeado Access Hidro API (AHAPI).
+## Sobre
+
+O **Access Hidro API (AHAPI)** é um software em **Python 3** para requisição de dados da **API Hidro Webservice** da Agência Nacional de Águas (ANA).
+Ele permite registrar credenciais, gerenciar estações e realizar o download de dados hidrometeorológicos de forma prática.
+
+---
+
+## Instalação
+
+### Via Código Fonte
+
+O programa foi desenvolvido em **Python 3**. Para executar:
+
+```bash
+# Clone o repositório
+git clone https://github.com/seu-usuario/AHAPI.git
+cd AHAPI
+
+# (Opcional) Crie um ambiente virtual
+python -m venv venv
+source venv/bin/activate   # Linux/Mac
+venv\Scripts\activate      # Windows
+
+# Instale as dependências
+pip install -r requirements.txt
+
+# Execute
+python main.py
+```
+
+### Via Executável
+
+Também há disponível uma versão compilada para **Windows 11**.
+Observações:
+
+* Pode não funcionar corretamente em outros sistemas operacionais.
+* Não possui assinatura digital, então seu antivírus pode sinalizar como potencial ameaça.
+
+---
+
+## Obtendo Credenciais
+
+As credenciais são concedidas pela **ANA** via e-mail.
+Siga as instruções disponíveis no Hidroweb: [Solicitar credenciais no Hidroweb](https://www.snirh.gov.br/hidroweb/acesso-api) para adquiri-lás.
+
+---
 
 ## Como Utilizar
-O software realiza requisições para a API de Consulta Hidro Webservice (https://www.ana.gov.br/hidrowebservice/swagger-ui/index.html#/WSEstacoesTelemetricasController). Para tal, é necessário solicitar a criação de um login e senha próprios através do e-mail telemetria@ana.gov.br.
 
-### Utilização do AccessHidroAPI
-O programa foi desenvolvido em Python, sendo necessário ter um interpretador desta linguagem instalado no computador do usuário para sua utilização. A inicialização do programa é feita ao rodar o arquivo *main.py*. 
-A interação do usuário se dá por meio de um menu no prompt de comando. As opções são mostradas na tela e são acessíveis através do input do número relacionado a elas.
+### 1. Registrando credenciais
 
-### Registrando credenciais
+Antes de solicitar dados:
 
-Antes de solicitar quaisquer dados, é preciso inserir as credenciais do usuário da API Webservice. Selecione a opção *Atualizar Credenciais* e insira os dados.
+* Selecione **Atualizar Credenciais**.
+* Insira os dados fornecidos pela ANA nos campos de Login e Senha.
+* Selecione **Confirmar**
 
-### Registrando estações
+---
 
-Os códigos das estações cujos dados serão baixados ficam salvos no arquivo *estacoes.txt*. É possível atualizá-lo manualmente, porém tal ação também pode ser realizada pelo AHAPI. Atente-se que, ao modificar manualmente o arquivo, cada código de estação deve estar em uma linha.
-Na opção *Atualizar Estações*, é possível escolher entre *Sobrescrever* e *Adicionar*. *Sobrescrever* apagará todos os códigos já salvos, substituindo-os pelos que serão informados. *Adicionar* complementa o arquivo com os novos códigos inseridos.
+### 2. Adicionando Estações
 
-### Solicitando dados
+#### Pelo AHAPI
 
-As opções de índices 4 e 5 solicitam dados de um único dia. Já os índices 5 e 6 solicitam dados de períodos, independentemente da duração. Serão solicitados dados de **todas** as estações com códigos salvos, conforme o tópico anterior. O mesmo intervalo de tempo será aplicado para todas as estações. 
+1. Clique em **Atualizar estações**.
+2. Selecione **Adicionar estações**.
+3. Insira os códigos das estações (um por linha).
+4. Clique em **Atualizar**.
 
-Os dados são salvos na pasta '//resultados//', em arquivos *.txt* nomeados de acordo com o código da estação e seu período de tempo.
+Opções adicionais:
 
-O download e a velocidade de download de qualquer dado estão sujeitos à disponibilidade de acesso à API de consulta do Hidro Webservice e à conexão de internet do usuário.
+* **Sobreescrever estações** → apaga registros anteriores e substitui pelas novas.
+* **Adicionar estações** → mantém registros anteriores e adiciona novas.
+* **Visualizar estações** → abre a lista atual de estações. É possível remover selecionadas.
 
-## Falhas Conhecidas
-Há certos comportamentos do usuário que podem causar mau funcionamento no programa. Todos serão tratados em versões posteriores do software. Abaixo há uma lista das falhas conhecidas:
+#### Manualmente
 
-- Input de datas inválidas:
-    - 'Data de começo' ser posterior à 'Data final'
-    - Data não possuir a formatação correta (yyyy-mm-dd)
-- Código de estação inválido
-- Dispositivo não conectado à internet
+Edite ou substitua o arquivo `estacoes.txt` manualmente.
+
+* O arquivo deve conter apenas códigos de estações
+* Cada código deve estar em **uma linha separada**.
+
+---
+
+### 3. Selecionando Tipo das Estações
+
+Os tipos de dados disponíveis:
+
+* Telemétricas Adotadas
+* Telemétricas Detalhadas
+* Convencionais de Chuva
+* Convencionais de Cota
+* Convencionais de Sedimentos
+
+---
+
+### 4. Solicitando Dados
+
+1. Clique em **Baixar Estações**.
+2. Selecione o período de datas.
+3. Clique em **Baixar estações**.
+
+O tempo de download depende da **disponibilidade da API da ANA** e da **velocidade de internet**.
+Uma barra de progresso indica o andamento da operação.
+
+---
+
+### 5. Acessando Dados
+
+Os arquivos baixados ficam organizados em `resultados/`, separados por tipo de estação:
+
+```
+resultados/
+ ├── Adotadas/
+ ├── Detalhadas/
+ ├── Chuvas/
+ ├── Cotas/
+ └── Sedimentos/
+```
+
+Cada arquivo segue o padrão:
+
+```
+códigoEstação-tipoEstação-dataInicial-dataFinal.txt
+```
+
+---
+
+##  Erros de Execução
+
+* Erros de uso são exibidos em **popups** para o usuário.
+* Logs detalhados ficam registrados em `logs/`.
+
+## Contato
+
+Para mais informações sobre o projeto, sugestões ou reportar erros:
+- Miguel Brondani - Desenvolvedor: brondani.miguel@gmail.com
+- Daniel Allasia - Professor Orientador: dallasia@gmail.com
+- Ecotecnologias - Grupo de Pesquisa: eco@ecotecnologias.org
+- https://github.com/mBrond/AccessHidroAPI

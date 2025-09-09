@@ -31,7 +31,7 @@ class Application:
         
         self.janela_atual = None
 
-        self.root.title(titulo)
+        self.root.title(titulo+' - '+versaoSoftware)
         self.root.configure(bg=BG_COLOR)
 
         self.carregar_imagens()
