@@ -1,5 +1,4 @@
 import inicializacao
-import traceback
 from manipulacaoArquivos import cria_log
 from interfaceGrafica import Application
 from tkinter import Tk
@@ -21,7 +20,7 @@ if __name__ == "__main__":
     pathEstacoes = 'estacoes.txt'
     tituloJanela = 'AHAPI'
     qtdDownloadAsync = 20
-    versao = "1.1.0"
+    versao = "1.2.0"
     
     error_handler.safe_execute(
         gerenciador,

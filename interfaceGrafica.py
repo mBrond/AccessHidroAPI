@@ -7,6 +7,7 @@ import os
 from error_handler import error_handler
 import threading
 from tkinter.ttk import Progressbar
+import ctypes
 
 BG_COLOR = "#DFF9CA"
 COLOR_VERDE = "#4CAF50"
@@ -33,7 +34,7 @@ class Application:
         self.root.title(titulo)
         self.root.configure(bg=BG_COLOR)
 
-        self.carregar_logo()
+        self.carregar_imagens()
 
         mainFrame = Frame(self.root, bg=BG_COLOR)
         mainFrame.pack(pady=20)
@@ -50,20 +51,38 @@ class Application:
 
         Button(mainFrame, text="Baixar estacoes", command=self.interface_baixar_estacoes, bg=COLOR_VERDE, fg=BTN_TEXT_COLOR).pack(pady=5, padx=10, fill=X)
 
-    def carregar_logo(self):
-        def carregar():
+
+    def carregar_imagens(self):
+        def carregar_icone():
+            try:
+                caminhoIconeJanela = os.path.join(os.path.dirname(__file__), "img", "ico.ico")
+                self.root.iconbitmap(caminhoIconeJanela)
+            except Exception as e:
+                print(f"[Aviso] Falha ao carregar .ico: {e}")
+
+
+        def carregar_logo():
             caminhoLogo = os.path.join(os.path.dirname(__file__), "img", "Logo.png")
             logoImg = PhotoImage(file=caminhoLogo)
             logoLabel = Label(self.root, image=logoImg, bg=BG_COLOR)
-            logoLabel.image = logoImg
+            logoLabel.image = logoImg  # evita garbage collection
             logoLabel.pack(pady=10)
-        
+
         error_handler.safe_execute(
-            carregar,
+            carregar_icone,
+            context="carregamento do ícone",
+            show_message=False,
+            log_level="WARNING"
+        )
+
+        error_handler.safe_execute(
+            carregar_logo,
             context="carregamento da logo",
             show_message=False,
             log_level="WARNING"
         )
+
+
 
     def interface_atualizar_credenciais(self):
         def criar_interface():
@@ -217,6 +236,10 @@ class Application:
                 def fazer_download():
                     dataInicio = calendarioInicio.get()
                     dataFim = calendarioFim.get()
+
+                    if dataInicio > dataFim:
+                        messagebox.showerror("Erro", "Data de início não pode ser maior que data de fim.")
+                        return
                     
                     #diretorio do tipo de estacao
                     pathDownload = f'{self.pathResultados}\\{self.tipo.get()}'
@@ -251,6 +274,9 @@ class Application:
                             progress['value'] = progress['maximum']
                         except Exception:
                             pass
+                    except PermissionError as perm_error:
+                        messagebox.showerror("Erro de Permissão", "Confira as credenciais de acesso.")
+
                     except Exception as error:
                         error_handler.handle_error(
                             error,
