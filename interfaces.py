@@ -61,8 +61,9 @@ def datasComecoFinal(): #FAZER CHECAGEM DE DATAS CORRETAS
     return [strComeco, strFinal]
 
 def interfaceMenu():
-    texto = "\n0. Sair\n1. Atualizar credenciais\n2. Atualizar estacoes\n3. Data única (Detalhada)\n"
-    texto = texto+"4. Data única (Adotada)\n5. Período (Detalhada)\n6. Período (Adotada)\n7. Mostrar credenciais salvas\n8. Alterar quantidade downloads assíncronos"
+    texto = "\n0. Sair\n1. Atualizar credenciais\n2. Atualizar estacoes\n3. Baixar Telemétricas Detalhadas\n"
+    texto +="4. Baixar Telemétricas Adotadas\n5. Baixar Convencionais Sedimentos\n6. Baixar Convencionais Cota"
+    texto+= "\n7. Baixar Convencionais Chuva\n8. Mostrar credenciais salvas\n9. Alterar quantidade downloads assíncronos"
     print(texto)
 
 def interfaceSolicitarEstacoes():
