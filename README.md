@@ -1,5 +1,5 @@
 # AccessHidroAPI (AHAPI)
-![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14759294.svg)](https://doi.org/10.5281/zenodo.14759294)
+![Python](https://img.shields.io/badge/python-3.12%2B-blue.svg) ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg) [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.17234552.svg)](https://doi.org/10.5281/zenodo.17234552)
 
 ## Sobre
 
